@@ -57,8 +57,6 @@ public class ElbonianArabicConverter {
             checkElbonianBoundaries(tempNum);
             validateOrder(tempNum);
         }
-        // TODO check wrong letters
-        // TODO check Numeral Rules
         this.number = tempNum;
     }
 
@@ -69,10 +67,15 @@ public class ElbonianArabicConverter {
      *
      * @return An arabic value
      */
-    public int toArabic() {
-        // TODO Fill in the method's body
+    public int toArabic() throws MalformedNumberException{
+        int count = 0;
+        char[] charArray = number.toCharArray();
 
-        return 1;
+        for (char c : charArray) {
+            count += getElbonianCharValue(c);
+        }
+
+        return count;
     }
 
     /**
@@ -81,8 +84,41 @@ public class ElbonianArabicConverter {
      * @return An Elbonian value
      */
     public String toElbonian() {
-        // TODO Fill in the method's body
-        return "I";
+        int number = Integer.parseInt(this.number);
+        String roman = "";
+        while(number >= 3000){
+            roman += "N";
+            number -= 3000;
+        }
+        while(number >= 1000){
+            roman += "M";
+            number -= 1000;
+        }
+        while(number >= 300){
+            roman += "D";
+            number -= 300;
+        }
+        while(number >= 100){
+            roman += "C";
+            number -= 100;
+        }
+        while(number >= 30) {
+            roman += "Y";
+            number -= 30;
+        }
+        while(number >= 10){
+            roman += "X";
+            number -= 10;
+        }
+        while(number >= 3){
+            roman += "J";
+            number -= 3;
+        }
+        while(number >= 1){
+            roman += "I";
+            number -= 1;
+        }
+        return roman;
     }
 
     private void checkEmpty(String number) throws MalformedNumberException {

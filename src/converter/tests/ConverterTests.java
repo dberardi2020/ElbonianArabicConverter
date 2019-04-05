@@ -12,11 +12,11 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConverterTests {
 
-    @Test
+   /** @Test
     public void ElbonianToArabicSampleTest() throws MalformedNumberException, ValueOutOfBoundsException {
         ElbonianArabicConverter converter = new ElbonianArabicConverter("1");
         assertEquals(converter.toElbonian(), "I");
-    }
+    }**/
 
     @Test
     public void ArabicToElbonianSampleTest() throws MalformedNumberException, ValueOutOfBoundsException {
@@ -136,6 +136,18 @@ public class ConverterTests {
     public void properConversion() throws MalformedNumberException, ValueOutOfBoundsException {
         ElbonianArabicConverter converter = new ElbonianArabicConverter("NNMDYYYJI");
         assertEquals(converter.toArabic(), 7394);
+    }
+
+    @Test
+    public void properConversion1() throws MalformedNumberException, ValueOutOfBoundsException {
+        ElbonianArabicConverter converter = new ElbonianArabicConverter("7394");
+        assertEquals(converter.toElbonian(), "NNMDYYYJI");
+    }
+
+    @Test
+    public void properConversion3() throws MalformedNumberException, ValueOutOfBoundsException {
+        ElbonianArabicConverter converter = new ElbonianArabicConverter("23");
+        assertEquals(converter.toElbonian(), "XXJ");
     }
 
     @Test(expected = MalformedNumberException.class)
