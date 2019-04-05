@@ -2,7 +2,10 @@ package converter;
 
 import converter.exceptions.MalformedNumberException;
 import converter.exceptions.ValueOutOfBoundsException;
-import javafx.scene.Scene;
+
+import java.util.HashMap;
+import java.util.Set;
+
 
 /**
  * This class implements a converter that takes a string that represents a number in either the
@@ -14,8 +17,7 @@ public class ElbonianArabicConverter {
 
     // A string that holds the number (Elbonian or Arabic) you would like to convert
     private final String number;
-    private final char[] validCharsInOrder = {'N', 'M', 'D', 'C', 'Y', 'X', 'J', 'I'};
-    private final int[] ElbonianCharVals = {3000, 1000, 300, 100, 30, 10, 3, 1};
+    private HashMap<Character, Integer> getNumeralValue = new HashMap<>();
 
     /**
      * Constructor for the ElbonianArabic class that takes a string. The string should contain a valid
@@ -32,8 +34,8 @@ public class ElbonianArabicConverter {
      */
     public ElbonianArabicConverter(String number) throws MalformedNumberException, ValueOutOfBoundsException {
         boolean isArabic = false;
+        constructHashmap();
         String tempNum;
-        // TODO check to see if the number is valid, then set it equal to the string
 
         /** remove leading and trailing spaces */
         tempNum = number.trim();
@@ -44,19 +46,18 @@ public class ElbonianArabicConverter {
         /** check for illegal space */
         checkIllegalSpace(tempNum);
 
-        // TODO Check Type (AR or EL)
         try {
             Integer.parseInt(tempNum);
             isArabic = true;
         } catch (Exception e) {
+            checkElbonianBoundaries(tempNum);
+            validateOrder(tempNum);
         }
 
         if (isArabic) {
             checkArabicBoundries(tempNum);
-        } else {
-            checkElbonianBoundaries(tempNum);
-            validateOrder(tempNum);
         }
+
         this.number = tempNum;
     }
 
@@ -67,12 +68,11 @@ public class ElbonianArabicConverter {
      *
      * @return An arabic value
      */
-    public int toArabic() throws MalformedNumberException{
+    public int toArabic() throws MalformedNumberException {
         int count = 0;
-        char[] charArray = number.toCharArray();
 
-        for (char c : charArray) {
-            count += getElbonianCharValue(c);
+        for (char c : number.toCharArray()) {
+            count += getNumeralValue.get(c);
         }
 
         return count;
@@ -86,35 +86,35 @@ public class ElbonianArabicConverter {
     public String toElbonian() {
         int number = Integer.parseInt(this.number);
         String roman = "";
-        while(number >= 3000){
+        while (number >= 3000) {
             roman += "N";
             number -= 3000;
         }
-        while(number >= 1000){
+        while (number >= 1000) {
             roman += "M";
             number -= 1000;
         }
-        while(number >= 300){
+        while (number >= 300) {
             roman += "D";
             number -= 300;
         }
-        while(number >= 100){
+        while (number >= 100) {
             roman += "C";
             number -= 100;
         }
-        while(number >= 30) {
+        while (number >= 30) {
             roman += "Y";
             number -= 30;
         }
-        while(number >= 10){
+        while (number >= 10) {
             roman += "X";
             number -= 10;
         }
-        while(number >= 3){
+        while (number >= 3) {
             roman += "J";
             number -= 3;
         }
-        while(number >= 1){
+        while (number >= 1) {
             roman += "I";
             number -= 1;
         }
@@ -134,106 +134,64 @@ public class ElbonianArabicConverter {
     }
 
     private void checkArabicBoundries(String number) throws ValueOutOfBoundsException {
-        int number1 = Integer.parseInt(number);
-        if (number1 >= 10000 || number1 == 0) {
+        int tempNum = Integer.parseInt(number);
+        if (tempNum >= 10000 || tempNum == 0) {
             throw new ValueOutOfBoundsException("ERROR: Out of Arabic Bounds");
         }
     }
 
-    public void checkElbonianBoundaries(String number) throws MalformedNumberException {
-        int m = 0;
-        int c = 0;
-        int x = 0;
-        int i = 0;
-        int n = 0;
-        int d = 0;
-        int y = 0;
-        int j = 0;
-        for (int z = 0; z < number.length(); z++) {
-            switch (number.charAt(z)) {
-                case 'M':
-                    m++;
-                    break;
-                case 'C':
-                    c++;
-                    break;
-                case 'X':
-                    x++;
-                    break;
-                case 'I':
-                    i++;
-                    break;
-                case 'N':
-                    n++;
-                    break;
-                case 'D':
-                    d++;
-                    break;
-                case 'Y':
-                    y++;
-                    break;
-                case 'J':
-                    j++;
-                    break;
-                default:
-                    throw new MalformedNumberException("ERROR: Invalid Numeral Used");
-            }
-        }
-        /*
-        M, C, X, and I. These letters can only appear a maximum of two times in a number.
-        N, D, Y, and J. These letters can only appear a maximum of three times in a number.
-        If N appears three times then the letter M cannot be used.
-        If D appears three times then the letter C cannot be used.
-        If Y appears three times then the letter X cannot be used.
-        If J appears three times then the letter I cannot be used.
-
-        Numbers are represented by the letters from the greatest value down to the lowest value.
-        In other words, the letter I would never appear before the letters M, D, X, or J.
-        The letter D would never appear before N or M but would appear before Y. The letters are summed together to determine the value.
-         */
-        if (m > 2 || c > 2 || x > 2 || i > 2)
-            throw new MalformedNumberException("ERROR: More than 2 of one of the following: [M,C,X,I]");
-        if (n > 3 || d > 3 || y > 3 || j > 3)
-            throw new MalformedNumberException("ERROR: More than 3 of one of the following: [M,C,X,I]");
-        if (n == 3 && m > 0) throw new MalformedNumberException("ERROR: Can't have an M if you have 3 N's");
-        if (d == 3 && c > 0) throw new MalformedNumberException("ERROR: Can't have a C if you have 3 D's");
-        if (y == 3 && x > 0) throw new MalformedNumberException("ERROR: Can't have an X if you have 3 Y's");
-        if (j == 3 && i > 0) throw new MalformedNumberException("ERROR: Can't have an I if you have 3 J's");
-    }
-
     private void validateOrder(String number) throws MalformedNumberException {
         for (int i = 0; i < number.length() - 1; i++) {
-            if (getElbonianCharValue(number.charAt(i)) < getElbonianCharValue(number.charAt(i+1)))
-            {
+            if (getNumeralValue.get(number.charAt(i)) < getNumeralValue.get(number.charAt(i + 1))) {
                 throw new MalformedNumberException("ERROR: Improper ordering of Numerals");
             }
         }
     }
 
-    private int getElbonianCharValue(char c) throws MalformedNumberException {
-        switch (c) {
-            case 'M':
-                return 1000;
-            case 'C':
-                return 100;
-            case 'X':
-                return 10;
-            case 'I':
-                return 1;
-            case 'N':
-                return 3000;
-            case 'D':
-                return 300;
-            case 'Y':
-                return 30;
-            case 'J':
-                return 3;
-            default:
-                throw new MalformedNumberException("ERROR: Invalid Numeral Used");
+    private void checkElbonianBoundaries(String number) throws MalformedNumberException {
+        Set<Character> keys = getNumeralValue.keySet();
+        HashMap<Character, Integer> counters = new HashMap<>();
+        for (Character key : keys) {
+            counters.put(key, 0);
         }
+
+        for (char c : number.toCharArray()) {
+            if (counters.containsKey(c)) {
+                counters.put(c, counters.get(c) + 1);
+            } else {
+                throw new MalformedNumberException("ERROR: Invalid Numeral Used");
+            }
+        }
+
+        char[] twoMax = {'M', 'C', 'X', 'I'};
+        for (char c : twoMax)
+        {
+            if(counters.get(c) > 2) throw new MalformedNumberException("ERROR: More than 2 of one of the following: [M,C,X,I]");
+        }
+        char[] threeMax = {'N', 'D', 'Y', 'J'};
+        for (char c : threeMax)
+        {
+            if(counters.get(c) > 3) throw new MalformedNumberException("ERROR: More than 3 of one of the following: [M,C,X,I]");
+        }
+
+        if (counters.get('N') == 3 && counters.get('M') > 0) throw new MalformedNumberException("ERROR: Can't have an M if you have 3 N's");
+        if (counters.get('D') == 3 && counters.get('C') > 0) throw new MalformedNumberException("ERROR: Can't have a C if you have 3 D's");
+        if (counters.get('Y') == 3 && counters.get('X') > 0) throw new MalformedNumberException("ERROR: Can't have an X if you have 3 Y's");
+        if (counters.get('J') == 3 && counters.get('I') > 0) throw new MalformedNumberException("ERROR: Can't have an I if you have 3 J's");
     }
 
-    public String getNumber() {
-        return number;
+        private void constructHashmap () {
+            getNumeralValue.put('N', 3000);
+            getNumeralValue.put('M', 1000);
+            getNumeralValue.put('D', 300);
+            getNumeralValue.put('C', 100);
+            getNumeralValue.put('Y', 30);
+            getNumeralValue.put('X', 10);
+            getNumeralValue.put('J', 3);
+            getNumeralValue.put('I', 1);
+        }
+
+        public String getNumber () {
+            return number;
+        }
     }
-}

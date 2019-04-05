@@ -192,6 +192,11 @@ public class ConverterTests {
         ElbonianArabicConverter converter = new ElbonianArabicConverter("        ");
     }
 
+    @Test(expected = MalformedNumberException.class)
+    public void invalidNumeral () throws MalformedNumberException, ValueOutOfBoundsException {
+        ElbonianArabicConverter converter = new ElbonianArabicConverter("Q");
+    }
+
     /**
      * Sample Tests
      */
