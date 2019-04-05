@@ -6,7 +6,6 @@ import converter.exceptions.ValueOutOfBoundsException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 /**
  * Test cases for the ElbonianArabicConverter class.
@@ -137,15 +136,16 @@ public class ConverterTests {
     public void properConversion() throws MalformedNumberException, ValueOutOfBoundsException {
         ElbonianArabicConverter converter = new ElbonianArabicConverter("NNMDYYYJI");
         assertEquals(converter.toArabic(), 7394);
-
-        ElbonianArabicConverter converter1 = new ElbonianArabicConverter("CCXJ");
-        assertEquals(converter1.toArabic(), 213);
     }
-
 
     @Test(expected = MalformedNumberException.class)
     public void WrongOrder() throws MalformedNumberException, ValueOutOfBoundsException {
         ElbonianArabicConverter converter = new ElbonianArabicConverter("IM");
+    }
+
+    @Test(expected = MalformedNumberException.class)
+    public void WrongOrder2() throws MalformedNumberException, ValueOutOfBoundsException {
+        ElbonianArabicConverter converter = new ElbonianArabicConverter("NMDCYXIJ");
     }
 
     @Test(expected = ValueOutOfBoundsException.class)

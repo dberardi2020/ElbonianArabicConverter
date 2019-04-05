@@ -15,6 +15,7 @@ public class ElbonianArabicConverter {
     // A string that holds the number (Elbonian or Arabic) you would like to convert
     private final String number;
     private final char[] validCharsInOrder = {'N', 'M', 'D', 'C', 'Y', 'X', 'J', 'I'};
+    private final int[] ElbonianCharVals = {3000, 1000, 300, 100, 30, 10, 3, 1};
 
     /**
      * Constructor for the ElbonianArabic class that takes a string. The string should contain a valid
@@ -52,10 +53,9 @@ public class ElbonianArabicConverter {
 
         if (isArabic) {
             checkArabicBoundries(tempNum);
-        }
-        else
-        {
+        } else {
             checkElbonianBoundaries(tempNum);
+            validateOrder(tempNum);
         }
         // TODO check wrong letters
         // TODO check Numeral Rules
@@ -92,7 +92,7 @@ public class ElbonianArabicConverter {
     private void checkIllegalSpace(String number) throws MalformedNumberException {
         for (int i = 0; i < number.length(); i++) {
             if (number.charAt(i) == ' ') {
-                throw new MalformedNumberException("Spacing Error");
+                throw new MalformedNumberException("ERROR: Improper Spacing");
             }
         }
     }
@@ -100,7 +100,7 @@ public class ElbonianArabicConverter {
     private void checkArabicBoundries(String number) throws ValueOutOfBoundsException {
         int number1 = Integer.parseInt(number);
         if (number1 >= 10000 || number1 == 0) {
-            throw new ValueOutOfBoundsException("Out of Arabic Bounds");
+            throw new ValueOutOfBoundsException("ERROR: Out of Arabic Bounds");
         }
     }
 
@@ -140,7 +140,7 @@ public class ElbonianArabicConverter {
                     j++;
                     break;
                 default:
-                    throw new MalformedNumberException("Non-Elbonian Character Used");
+                    throw new MalformedNumberException("ERROR: Invalid Numeral Used");
             }
         }
         /*
@@ -155,12 +155,46 @@ public class ElbonianArabicConverter {
         In other words, the letter I would never appear before the letters M, D, X, or J.
         The letter D would never appear before N or M but would appear before Y. The letters are summed together to determine the value.
          */
-        if(m > 2 || c > 2 || x > 2 || i > 2) throw new MalformedNumberException("ERROR: More than 2 of one of the following: [M,C,X,I]");
-        if(n > 3 || d > 3 || y > 3 || j > 3) throw new MalformedNumberException("ERROR: More than 3 of one of the following: [M,C,X,I]");
-        if(n == 3 && m > 0) throw new MalformedNumberException("ERROR: Can't have an M if you have 3 N's");
-        if(d == 3 && c > 0) throw new MalformedNumberException("ERROR: Can't have a C if you have 3 D's");
-        if(y == 3 && x > 0) throw new MalformedNumberException("ERROR: Can't have an X if you have 3 Y's");
-        if(j == 3 && i > 0) throw new MalformedNumberException("ERROR: Can't have an I if you have 3 J's");
+        if (m > 2 || c > 2 || x > 2 || i > 2)
+            throw new MalformedNumberException("ERROR: More than 2 of one of the following: [M,C,X,I]");
+        if (n > 3 || d > 3 || y > 3 || j > 3)
+            throw new MalformedNumberException("ERROR: More than 3 of one of the following: [M,C,X,I]");
+        if (n == 3 && m > 0) throw new MalformedNumberException("ERROR: Can't have an M if you have 3 N's");
+        if (d == 3 && c > 0) throw new MalformedNumberException("ERROR: Can't have a C if you have 3 D's");
+        if (y == 3 && x > 0) throw new MalformedNumberException("ERROR: Can't have an X if you have 3 Y's");
+        if (j == 3 && i > 0) throw new MalformedNumberException("ERROR: Can't have an I if you have 3 J's");
+    }
+
+    private void validateOrder(String number) throws MalformedNumberException {
+        for (int i = 0; i < number.length() - 1; i++) {
+            if (getElbonianCharValue(number.charAt(i)) < getElbonianCharValue(number.charAt(i+1)))
+            {
+                throw new MalformedNumberException("ERROR: Improper ordering of Numerals");
+            }
+        }
+    }
+
+    private int getElbonianCharValue(char c) throws MalformedNumberException {
+        switch (c) {
+            case 'M':
+                return 1000;
+            case 'C':
+                return 100;
+            case 'X':
+                return 10;
+            case 'I':
+                return 1;
+            case 'N':
+                return 3000;
+            case 'D':
+                return 300;
+            case 'Y':
+                return 30;
+            case 'J':
+                return 3;
+            default:
+                throw new MalformedNumberException("ERROR: Invalid Numeral Used");
+        }
     }
 
     public String getNumber() {
